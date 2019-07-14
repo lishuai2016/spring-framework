@@ -59,17 +59,19 @@ import static org.junit.Assert.*;
  */
 public class ContextLoaderTests {
 
+	//第一个运行的测试类
 	@Test
 	public void testContextLoaderListenerWithDefaultContext() {
+		//mock一个servlet容器加载下面的xml配置文件
 		MockServletContext sc = new MockServletContext("");
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml " +
 				"/org/springframework/web/context/WEB-INF/context-addition.xml");
 		ServletContextListener listener = new ContextLoaderListener();
 		ServletContextEvent event = new ServletContextEvent(sc);
-		listener.contextInitialized(event);
+		listener.contextInitialized(event);//spring监听器根据ServletContextEvent事件创建WebApplicationContext容器
 		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
-		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);
+		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);//获得根容器
 		assertTrue("Correct WebApplicationContext exposed in ServletContext", context instanceof XmlWebApplicationContext);
 		assertTrue(WebApplicationContextUtils.getRequiredWebApplicationContext(sc) instanceof XmlWebApplicationContext);
 		LifecycleBean lb = (LifecycleBean) context.getBean("lifecycle");

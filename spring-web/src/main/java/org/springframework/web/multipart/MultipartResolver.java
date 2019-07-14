@@ -19,6 +19,9 @@ package org.springframework.web.multipart;
 import javax.servlet.http.HttpServletRequest;
 
 /**
+ * 内容类型( Content-Type )为 multipart/* 的请求的解析器接口。
+ * 比如文件上传
+ *
  * A strategy interface for multipart file upload resolution in accordance
  * with <a href="https://www.ietf.org/rfc/rfc1867.txt">RFC 1867</a>.
  * Implementations are typically usable both within an application context
@@ -91,6 +94,9 @@ public interface MultipartResolver {
 	 * @param request the servlet request to be evaluated
 	 * @return whether the request contains multipart content
 	 */
+	/**
+	 * 是否为 multipart 请求
+	 */
 	boolean isMultipart(HttpServletRequest request);
 
 	/**
@@ -110,12 +116,19 @@ public interface MultipartResolver {
 	 * @see javax.servlet.http.HttpServletRequest#getParameterNames
 	 * @see javax.servlet.http.HttpServletRequest#getParameterMap
 	 */
+	/**
+	 * 将 HttpServletRequest 请求封装成 MultipartHttpServletRequest 对象
+	 */
 	MultipartHttpServletRequest resolveMultipart(HttpServletRequest request) throws MultipartException;
 
 	/**
 	 * Cleanup any resources used for the multipart handling,
 	 * like a storage for the uploaded files.
 	 * @param request the request to cleanup resources for
+	 */
+	/**
+	 * 清理处理 multipart 产生的资源，例如临时文件
+	 *
 	 */
 	void cleanupMultipart(MultipartHttpServletRequest request);
 

@@ -76,6 +76,27 @@ Open File(spring-beans\spring-beans.gradle ）
 为什么我从其他分支拉下来的，执行gradle.bat cleanIdea :spring-oxm:compileTestJava可以成功，而5.0.x分支却不行？？？
 
 
+5、遇到的问题
+
+> 1、运行单元测试 testContextLoaderListenerWithDefaultContext ， spring-oxm缺少castor和jaxb
+
+将spring源码下载编译后，导入eclipse的过程中发现spring-oxm缺少castor和jax
+
+查看spring-oxm下的spring-oxm.gradle文件后，发现可以在spring-oxm项目目录下执行下面两个命令：
+
+1.gradle genCastor
+
+2.gradle genJaxb
+
+![](../pic/2019-07-14-16-39-41.png)
+
+刷新项目即可
+
+
+
+
+
+
 # 遇到的其他问题
 
 ## 问题1

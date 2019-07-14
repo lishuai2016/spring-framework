@@ -164,6 +164,8 @@ public class DefaultRequestToViewNameTranslator implements RequestToViewNameTran
 	 * into the view name based on the configured parameters.
 	 * @see org.springframework.web.util.UrlPathHelper#getLookupPathForRequest
 	 * @see #transformPath
+	 *
+	 * 唯一的实现类
 	 */
 	@Override
 	public String getViewName(HttpServletRequest request) {

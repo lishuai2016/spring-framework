@@ -34,6 +34,39 @@ import javax.servlet.ServletContextListener;
  * @see #setContextInitializers
  * @see org.springframework.web.WebApplicationInitializer
  */
+
+
+//<!-- 省略非关键的配置 -->
+//
+//		<!-- [1] Spring配置 -->
+//		<listener>
+//		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+//</listener>
+//<!-- 指定Spring Bean的配置文件所在目录。默认配置在WEB-INF目录下 -->
+//<context-param>
+//<param-name>contextConfigLocation</param-name>
+//<param-value>classpath:config/applicationContext.xml</param-value>
+//</context-param>
+//
+//<!-- ====================================== -->
+//
+//<!-- [2] Spring MVC配置 -->
+//<servlet>
+//<servlet-name>spring</servlet-name>
+//<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+//<!-- 可以自定义servlet.xml配置文件的位置和名称，默认为WEB-INF目录下，名称为[<servlet-name>]-servlet.xml，如spring-servlet.xml
+//<init-param>
+//<param-name>contextConfigLocation</param-name>
+//<param-value>/WEB-INF/spring-servlet.xml</param-value> // 默认
+//</init-param>
+//		-->
+//<load-on-startup>1</load-on-startup>
+//</servlet>
+//<servlet-mapping>
+//<servlet-name>spring</servlet-name>
+//<url-pattern>*.do</url-pattern>
+//</servlet-mapping>
+
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
 	/**
@@ -100,12 +133,14 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 */
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
+		//调用父类 ContextLoader 的 #initWebApplicationContext(ServletContext servletContext) 方法，初始化 WebApplicationContext 对象。
 		initWebApplicationContext(event.getServletContext());
 	}
 
 
 	/**
 	 * Close the root web application context.
+	 * 销毁 WebApplicationContext 容器的逻辑
 	 */
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {

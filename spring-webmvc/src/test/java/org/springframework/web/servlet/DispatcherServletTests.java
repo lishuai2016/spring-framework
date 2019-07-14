@@ -101,6 +101,7 @@ public class DispatcherServletTests {
 		return servletConfig.getServletContext();
 	}
 
+	// DispatcherServlets的调试类
 	@Test
 	public void configuredDispatcherServlets() {
 		assertTrue("Correct namespace",
