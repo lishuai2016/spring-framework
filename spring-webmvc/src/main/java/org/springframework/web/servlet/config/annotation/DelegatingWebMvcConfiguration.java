@@ -38,15 +38,19 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
  *
  * @author Rossen Stoyanchev
  * @since 3.1
+ *
+DelegatingWebMvcConfiguration继承WebMvcConfigurationSupport，
+调用setConfigurers方法获取应用创建的WebMvcConfigurer实例，
+并通过以WebMvcConfigurerComposite来代理这些实例，从而获取应用自定义配置。
  */
 @Configuration
 public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
-
+	// 通过 WebMvcConfigurerComposite 管理用户自定义的 WebMvcConfigurer
 	private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
 
 
 	@Autowired(required = false)
-	public void setConfigurers(List<WebMvcConfigurer> configurers) {
+	public void setConfigurers(List<WebMvcConfigurer> configurers) {//接收用户自定义的配置
 		if (!CollectionUtils.isEmpty(configurers)) {
 			this.configurers.addWebMvcConfigurers(configurers);
 		}

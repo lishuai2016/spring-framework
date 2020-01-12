@@ -34,6 +34,8 @@ import org.springframework.web.servlet.ModelAndView;
  * @since 2.0
  * @see org.springframework.web.context.request.WebRequestInterceptor
  * @see org.springframework.web.servlet.HandlerInterceptor
+ *
+ * 作用是吧WebRequestInterceptor对象适配为HandlerInterceptor对象
  */
 public class WebRequestHandlerInterceptorAdapter implements AsyncHandlerInterceptor {
 

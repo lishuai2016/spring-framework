@@ -67,6 +67,9 @@ import javax.servlet.ServletContextListener;
 //<url-pattern>*.do</url-pattern>
 //</servlet-mapping>
 
+
+//ContextLoaderListener 是用来监听 ServletContext 加载事件的。
+// 当 ServletContext 被加载后，监听器的 contextInitialized 方法就会被 Servlet 容器调用。
 public class ContextLoaderListener extends ContextLoader implements ServletContextListener {
 
 	/**

@@ -63,32 +63,42 @@ public class BeanFactoryAdvisorRetrievalHelper {
 	 * ignoring FactoryBeans and excluding beans that are currently in creation.
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
+	1、从容器中查找所有类型为 Advisor 的 bean 对应的名称
+	2、遍历 advisorNames，并从容器中获取对应的 bean
 	 */
 	public List<Advisor> findAdvisorBeans() {
 		// Determine list of advisor bean names, if not cached already.
-		String[] advisorNames = this.cachedAdvisorBeanNames;
+		String[] advisorNames = this.cachedAdvisorBeanNames;//advisor的本地缓存
+		  /*
+         * 如果 cachedAdvisorBeanNames 为空，这里到容器中查找，
+         * 并设置缓存，后续直接使用缓存即可
+         */
 		if (advisorNames == null) {
 			// Do not initialize FactoryBeans here: We need to leave all regular beans
 			// uninitialized to let the auto-proxy creator apply to them!
 			advisorNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 					this.beanFactory, Advisor.class, true, false);
-			this.cachedAdvisorBeanNames = advisorNames;
+			this.cachedAdvisorBeanNames = advisorNames;//设置缓存
 		}
 		if (advisorNames.length == 0) {
 			return new ArrayList<>();
 		}
 
-		List<Advisor> advisors = new ArrayList<>();
-		for (String name : advisorNames) {
+		List<Advisor> advisors = new ArrayList<>();//封装返回对象
+		for (String name : advisorNames) { // 遍历 advisorNames
 			if (isEligibleBean(name)) {
-				if (this.beanFactory.isCurrentlyInCreation(name)) {
+				if (this.beanFactory.isCurrentlyInCreation(name)) {// 忽略正在创建中的 advisor bean
 					if (logger.isDebugEnabled()) {
 						logger.debug("Skipping currently created advisor '" + name + "'");
 					}
 				}
 				else {
 					try {
-						advisors.add(this.beanFactory.getBean(name, Advisor.class));
+						 /*
+                     * 调用 getBean 方法从容器中获取名称为 name 的 bean，
+                     * 并将 bean 添加到 advisors 中
+                     */
+						advisors.add(this.beanFactory.getBean(name, Advisor.class));//从工厂中根据name和类型查询bean
 					}
 					catch (BeanCreationException ex) {
 						Throwable rootCause = ex.getMostSpecificCause();

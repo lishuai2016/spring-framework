@@ -50,6 +50,9 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @since 3.1
+ *
+ * 请求信息的封装
+ * 应该是RequestMapping封装的抽象类
  */
 public final class RequestMappingInfo implements RequestCondition<RequestMappingInfo> {
 
@@ -211,6 +214,10 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	 * <p>For example the returned instance may contain the subset of URL patterns that match to
 	 * the current request, sorted with best matching patterns on top.
 	 * @return a new instance in case all conditions match; or {@code null} otherwise
+	 *
+	 * tailored 定制的
+	 *
+	 * 根据当前RequestMappingInfo的条件为当前请求request定制一个RequestMappingInfo对象
 	 */
 	@Override
 	@Nullable
@@ -234,7 +241,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (custom == null) {
 			return null;
 		}
-
+		//根据匹配条件生成一个对象
 		return new RequestMappingInfo(this.name, patterns,
 				methods, params, headers, consumes, produces, custom.getCondition());
 	}

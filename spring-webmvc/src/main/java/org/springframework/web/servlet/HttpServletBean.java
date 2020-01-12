@@ -149,6 +149,16 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	 *
 	 * 把配置的参数映射到bean的属性上，然后让子类根据这些属性来完成初始化
 	 * 重新父类的方法，在servlet初始化的时候，然子类来完成初始化
+	 *
+	前面说了业务容器的创建过程，业务容器是通过 ContextLoaderListener。
+	那 Web 容器是通过什么创建的呢？答案是通过 DispatcherServlet。
+	我在上一篇文章介绍 HttpServletBean 抽象类时，说过该类覆写了父类 HttpServlet 中的 init 方法。
+	这个方法就是创建 Web 容器的入口，那下面我们就从这个方法入手
+
+
+
+
+	主要做的事情是将 ServletConfig 中的配置信息设置到 HttpServletBean 的子类对象中（比如 DispatcherServlet）
 	 */
 	@Override
 	public final void init() throws ServletException {
@@ -158,11 +168,16 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 		// Set bean properties from init parameters.
 		// <1> 解析 <init-param /> 标签，封装到 PropertyValues pvs 中  ，比如，指定的springmvc配置文件
+		// 获取 ServletConfig 中的配置信息
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
 				// <2.1> 将当前的这个 Servlet 对象，转化成一个 BeanWrapper 对象。从而能够以 Spring 的方式来将 pvs 注入到该 BeanWrapper 对象中
 				//简单来说，BeanWrapper 是 Spring 提供的一个用来操作 Java Bean 属性的工具，使用它可以直接修改一个对象的属性。
+				  /*
+             * 为当前对象（比如 DispatcherServlet 对象）创建一个 BeanWrapper，
+             * 方便读/写对象属性。
+             */
 				BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(this);
 				ResourceLoader resourceLoader = new ServletContextResourceLoader(getServletContext());
 				// <2.2> 注册自定义属性编辑器，一旦碰到 Resource 类型的属性，将会使用 ResourceEditor 进行解析
@@ -182,7 +197,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 
 		// Let subclasses do whatever initialization they like. 让子类进行初始化
 		// <3> 子类来实现，实现自定义的初始化逻辑。目前，有具体的代码实现。
-		initServletBean();
+		initServletBean(); // 进行后续的初始化
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Servlet '" + getServletName() + "' configured successfully");

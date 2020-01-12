@@ -37,7 +37,7 @@ import org.springframework.util.Assert;
 @SuppressWarnings("serial")
 public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeAdvice, Serializable {
 
-	private final MethodBeforeAdvice advice;
+	private final MethodBeforeAdvice advice; /** 前置通知 */
 
 
 	/**
@@ -52,8 +52,8 @@ public class MethodBeforeAdviceInterceptor implements MethodInterceptor, BeforeA
 
 	@Override
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		this.advice.before(mi.getMethod(), mi.getArguments(), mi.getThis());
-		return mi.proceed();
+		this.advice.before(mi.getMethod(), mi.getArguments(), mi.getThis()); // 执行前置通知逻辑
+		return mi.proceed();// 通过 MethodInvocation 调用下一个拦截器，若所有拦截器均执行完，则调用目标方法
 	}
 
 }

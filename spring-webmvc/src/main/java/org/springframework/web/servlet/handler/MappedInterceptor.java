@@ -41,19 +41,37 @@ import org.springframework.web.servlet.ModelAndView;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  * @since 3.0
+
+<mvc:interceptors>
+<mvc:interceptor>
+<mvc:mapping path="/interceptor/**" />
+<mvc:exclude-mapping path="/interceptor/b/*" />
+<bean class="com.elim.learn.spring.mvc.interceptor.MyInterceptor" />
+</mvc:interceptor>
+</mvc:interceptors>
+
+每一个 <mvc:interceptor /> 标签，会被 org.springframework.web.servlet.config.InterceptorsBeanDefinitionParser
+解析成一个 MappedInterceptor Bean 对象。
+
+在 AbstractHandlerMapping 的 #detectMappedInterceptors(List<HandlerInterceptor> mappedInterceptors) 方法中，
+会扫描 MappedInterceptor Bean 。
+
+
+ 备注：会根据请求路径做匹配，是否进行拦截
+
  */
 public final class MappedInterceptor implements HandlerInterceptor {
 
 	@Nullable
-	private final String[] includePatterns;
+	private final String[] includePatterns;//构造函数中设置
 
 	@Nullable
-	private final String[] excludePatterns;
+	private final String[] excludePatterns;//构造函数中设置
 
-	private final HandlerInterceptor interceptor;
+	private final HandlerInterceptor interceptor;//构造函数中设置【这里面的为配置实现了HandlerInterceptor接口的对象】
 
 	@Nullable
-	private PathMatcher pathMatcher;
+	private PathMatcher pathMatcher;//set设置
 
 
 	/**
@@ -70,6 +88,8 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 * @param includePatterns the path patterns to map (empty for matching to all paths)
 	 * @param excludePatterns the path patterns to exclude (empty for no specific excludes)
 	 * @param interceptor the HandlerInterceptor instance to map to the given patterns
+	 *
+	 * 重载最后的构造方法
 	 */
 	public MappedInterceptor(@Nullable String[] includePatterns, @Nullable String[] excludePatterns,
 			HandlerInterceptor interceptor) {
@@ -145,17 +165,17 @@ public final class MappedInterceptor implements HandlerInterceptor {
 	 */
 	public boolean matches(String lookupPath, PathMatcher pathMatcher) {
 		PathMatcher pathMatcherToUse = (this.pathMatcher != null ? this.pathMatcher : pathMatcher);
-		if (!ObjectUtils.isEmpty(this.excludePatterns)) {
+		if (!ObjectUtils.isEmpty(this.excludePatterns)) {//如果配置了不进行拦截的路径，进行遍历
 			for (String pattern : this.excludePatterns) {
-				if (pathMatcherToUse.match(pattern, lookupPath)) {
+				if (pathMatcherToUse.match(pattern, lookupPath)) {//匹配到了返回false，则当前拦截器不对请求进行处理
 					return false;
 				}
 			}
 		}
-		if (ObjectUtils.isEmpty(this.includePatterns)) {
+		if (ObjectUtils.isEmpty(this.includePatterns)) {// 特殊，如果包含为空，则默认就是包含
 			return true;
 		}
-		for (String pattern : this.includePatterns) {
+		for (String pattern : this.includePatterns) {//匹配设置的拦截路径
 			if (pathMatcherToUse.match(pattern, lookupPath)) {
 				return true;
 			}

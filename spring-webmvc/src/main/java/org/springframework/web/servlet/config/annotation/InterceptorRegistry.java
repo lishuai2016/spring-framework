@@ -44,6 +44,24 @@ public class InterceptorRegistry {
 	 * @param interceptor the interceptor to add
 	 * @return An {@link InterceptorRegistration} that allows you optionally configure the
 	 * registered interceptor further for example adding URL patterns it should apply to.
+
+	 通过bean的方式添加拦截器，如
+
+	 @EnableWebMvc
+	 @Configuration
+	 public class MVCConfiguration extends WebMvcConfigurerAdapter {
+
+	 @Autowired
+	 private SecurityInterceptor securityInterceptor;
+
+	 @Override
+	 public void addInterceptors(InterceptorRegistry registry) {
+	 registry.addInterceptor(securityInterceptor);
+	 }
+
+	 }
+	 调用这里的方法
+
 	 */
 	public InterceptorRegistration addInterceptor(HandlerInterceptor interceptor) {
 		InterceptorRegistration registration = new InterceptorRegistration(interceptor);
@@ -65,7 +83,7 @@ public class InterceptorRegistry {
 	}
 
 	/**
-	 * Return all registered interceptors.
+	 * Return all registered interceptors.  返回所有注册的拦截器
 	 */
 	protected List<Object> getInterceptors() {
 		return this.registrations.stream()

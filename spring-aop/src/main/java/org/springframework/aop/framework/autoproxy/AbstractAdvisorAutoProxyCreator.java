@@ -72,7 +72,7 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	@Nullable
 	protected Object[] getAdvicesAndAdvisorsForBean(
 			Class<?> beanClass, String beanName, @Nullable TargetSource targetSource) {
-
+		// 查找合适的通知器
 		List<Advisor> advisors = findEligibleAdvisors(beanClass, beanName);
 		if (advisors.isEmpty()) {
 			return DO_NOT_PROXY;
@@ -91,9 +91,16 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+		// 查找所有的通知器
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		 /*
+     * 筛选可应用在 beanClass 上的 Advisor，通过 ClassFilter 和 MethodMatcher
+     * 对目标类和方法进行匹配
+     */
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
-		extendAdvisors(eligibleAdvisors);
+		// 拓展操作，该方法主要的目的是向通知器列表首部添加 DefaultPointcutAdvisor 类型的通知器，
+		// 也就是 ExposeInvocationInterceptor.ADVISOR
+		extendAdvisors(eligibleAdvisors);//空方法，让子类去实现
 		if (!eligibleAdvisors.isEmpty()) {
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 		}
@@ -103,6 +110,13 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	/**
 	 * Find all candidate Advisors to use in auto-proxying.
 	 * @return the List of candidate Advisors
+	从上面的源码中可以看出，AbstractAdvisorAutoProxyCreator 中的 findCandidateAdvisors 是个空壳方法，
+	所有逻辑封装在了一个 BeanFactoryAdvisorRetrievalHelper 的 findAdvisorBeans 方法中。
+	这里大家可以仔细看一下类名 BeanFactoryAdvisorRetrievalHelper 和方法 findAdvisorBeans，
+	两个名字其实已经描述出他们的职责了。BeanFactoryAdvisorRetrievalHelper
+	可以理解为从 bean 容器中获取 Advisor 的帮助类，findAdvisorBeans 则可理解为查找 Advisor 类型的 bean。
+	所以即使不看 findAdvisorBeans 方法的源码，我们也可从方法名上推断出它要做什么，
+	即从 bean 容器中将 Advisor 类型的 bean 查找出来
 	 */
 	protected List<Advisor> findCandidateAdvisors() {
 		Assert.state(this.advisorRetrievalHelper != null, "No BeanFactoryAdvisorRetrievalHelper available");
@@ -117,12 +131,15 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @param beanName the target's bean name
 	 * @return the List of applicable Advisors
 	 * @see ProxyCreationContext#getCurrentProxiedBeanName()
+	查找出所有的通知器，整个流程还没算完，接下来我们还要对这些通知器进行筛选。
+	适合应用在当前 bean 上的通知器留下，不适合的就让它自生自灭吧
 	 */
 	protected List<Advisor> findAdvisorsThatCanApply(
 			List<Advisor> candidateAdvisors, Class<?> beanClass, String beanName) {
 
 		ProxyCreationContext.setCurrentProxiedBeanName(beanName);
 		try {
+			// 调用重载方法
 			return AopUtils.findAdvisorsThatCanApply(candidateAdvisors, beanClass);
 		}
 		finally {

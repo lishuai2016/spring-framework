@@ -66,16 +66,17 @@ public class HandlerExecutionChain {
 	 * (in the given order) before the handler itself executes
 	 */
 	public HandlerExecutionChain(Object handler, @Nullable HandlerInterceptor... interceptors) {
+		//如果传入的对象本身就是一个HandlerExecutionChain，需要从中提取出handler处理器和拦截器，并且把拦截器合并到一起
 		if (handler instanceof HandlerExecutionChain) {
 			HandlerExecutionChain originalChain = (HandlerExecutionChain) handler;
 			this.handler = originalChain.getHandler();
 			this.interceptorList = new ArrayList<>();
-			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);
-			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);
+			CollectionUtils.mergeArrayIntoCollection(originalChain.getInterceptors(), this.interceptorList);//合并提取出的拦截器
+			CollectionUtils.mergeArrayIntoCollection(interceptors, this.interceptorList);//合并参数传递过来的拦截器
 		}
 		else {
 			this.handler = handler;
-			this.interceptors = interceptors;
+			this.interceptors = interceptors;//构造函数传递过来的
 		}
 	}
 
@@ -97,9 +98,14 @@ public class HandlerExecutionChain {
 		}
 	}
 
+	/**
+	 * 在调用addInterceptor添加新的拦截器的时候触发
+	 * 作用是吧通过构造函数传递过来的拦截器数组初始化到list拦截器中，并把本地的拦截器数组设置为空
+	 * @return
+	 */
 	private List<HandlerInterceptor> initInterceptorList() {
 		if (this.interceptorList == null) {
-			this.interceptorList = new ArrayList<>();
+			this.interceptorList = new ArrayList<>();//初始化list拦截器数组
 			if (this.interceptors != null) {
 				// An interceptor array specified through the constructor
 				CollectionUtils.mergeArrayIntoCollection(this.interceptors, this.interceptorList);
@@ -129,15 +135,18 @@ public class HandlerExecutionChain {
 	 * that this interceptor has already dealt with the response itself.
 	 */
 	boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
-		HandlerInterceptor[] interceptors = getInterceptors();
+		HandlerInterceptor[] interceptors = getInterceptors();//获得拦截器数组
 		if (!ObjectUtils.isEmpty(interceptors)) {
 			for (int i = 0; i < interceptors.length; i++) {
 				HandlerInterceptor interceptor = interceptors[i];
-				if (!interceptor.preHandle(request, response, this.handler)) {
+				if (!interceptor.preHandle(request, response, this.handler)) {//如果拦截器的前置方法返回false
+					//注意，此处不是触发当前拦截器的已完成逻辑，而是触发 [0, interceptorIndex)
+					// 这几个拦截器已完成的逻辑( 不包括当前这个拦截器 )，并且是按照倒序执行的。
+					//因为当前拦截器的下标在下面还没更新到
 					triggerAfterCompletion(request, response, null);
 					return false;
 				}
-				this.interceptorIndex = i;
+				this.interceptorIndex = i;//更新执行到当前拦截器的游标
 			}
 		}
 		return true;
@@ -151,7 +160,7 @@ public class HandlerExecutionChain {
 
 		HandlerInterceptor[] interceptors = getInterceptors();
 		if (!ObjectUtils.isEmpty(interceptors)) {
-			for (int i = interceptors.length - 1; i >= 0; i--) {
+			for (int i = interceptors.length - 1; i >= 0; i--) {//拦截器的方法后置处理顺序反方向调用
 				HandlerInterceptor interceptor = interceptors[i];
 				interceptor.postHandle(request, response, this.handler, mv);
 			}
@@ -162,6 +171,8 @@ public class HandlerExecutionChain {
 	 * Trigger afterCompletion callbacks on the mapped HandlerInterceptors.
 	 * Will just invoke afterCompletion for all interceptors whose preHandle invocation
 	 * has successfully completed and returned true.
+	 * 只有拦截器的前置方法被调用了，该拦截器的afterCompletion才会被触发，按照栈的思路，先被调用的后被调用
+	 * 简单来说就是根据游标的位置反方向调用
 	 */
 	void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, @Nullable Exception ex)
 			throws Exception {
@@ -182,6 +193,7 @@ public class HandlerExecutionChain {
 
 	/**
 	 * Apply afterConcurrentHandlerStarted callback on mapped AsyncHandlerInterceptors.
+	 * 异步拦截器的处理，作用？？？
 	 */
 	void applyAfterConcurrentHandlingStarted(HttpServletRequest request, HttpServletResponse response) {
 		HandlerInterceptor[] interceptors = getInterceptors();

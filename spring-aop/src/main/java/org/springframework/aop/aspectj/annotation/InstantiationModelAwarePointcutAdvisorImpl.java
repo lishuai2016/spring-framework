@@ -110,7 +110,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 			// A singleton aspect.
 			this.pointcut = this.declaredPointcut;
 			this.lazy = false;
-			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
+			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);// 按照注解解析 Advice
 		}
 	}
 
@@ -144,7 +144,16 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		return this.instantiatedAdvice;
 	}
+	/**
+	 主要的逻辑就是根据注解类型生成与之对应的通知对象。下面来总结一下获取通知器（getAdvisors）整个过程的逻辑，如下：
 
+	 1、从目标 bean 中获取不包含 Pointcut 注解的方法列表
+	 2、遍历上一步获取的方法列表，并调用 getAdvisor 获取当前方法对应的 Advisor
+	 3、创建 AspectJExpressionPointcut 对象，并从方法中的注解中获取表达式，最后设置到切点对象中
+	 4、创建 Advisor 实现类对象 InstantiationModelAwarePointcutAdvisorImpl
+	 5、调用 instantiateAdvice 方法构建通知
+	 6、调用 getAdvice 方法，并根据注解类型创建相应的通知
+	 */
 	private Advice instantiateAdvice(AspectJExpressionPointcut pointcut) {
 		Advice advice = this.aspectJAdvisorFactory.getAdvice(this.aspectJAdviceMethod, pointcut,
 				this.aspectInstanceFactory, this.declarationOrder, this.aspectName);

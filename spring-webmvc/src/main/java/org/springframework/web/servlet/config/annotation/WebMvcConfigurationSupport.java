@@ -169,6 +169,9 @@ import org.springframework.web.util.UrlPathHelper;
  * @since 3.1
  * @see EnableWebMvc
  * @see WebMvcConfigurer
+ *
+
+负责创建”Mvc”需要的一些组件，如ResourceUrlProvider, HandlerMapping等。
  */
 public class WebMvcConfigurationSupport implements ApplicationContextAware, ServletContextAware {
 
@@ -274,12 +277,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	/**
 	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
 	 * requests to annotated controllers.
+	 * 处理通过requestmapping设置映射
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();
+		RequestMappingHandlerMapping mapping = createRequestMappingHandlerMapping();//通过new的方式生成一个RequestMappingHandlerMapping对象
 		mapping.setOrder(0);
-		mapping.setInterceptors(getInterceptors());
+		mapping.setInterceptors(getInterceptors());//设置拦截器
 		mapping.setContentNegotiationManager(mvcContentNegotiationManager());
 		mapping.setCorsConfigurations(getCorsConfigurations());
 
@@ -304,7 +308,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 		PathMatcher pathMatcher = configurer.getPathMatcher();
 		if (pathMatcher != null) {
-			mapping.setPathMatcher(pathMatcher);
+			mapping.setPathMatcher(pathMatcher);//路径匹配器
 		}
 
 		return mapping;
@@ -327,10 +331,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected final Object[] getInterceptors() {
 		if (this.interceptors == null) {
 			InterceptorRegistry registry = new InterceptorRegistry();
-			addInterceptors(registry);
+			addInterceptors(registry);//模板方法
+			//设置默认的拦截器
 			registry.addInterceptor(new ConversionServiceExposingInterceptor(mvcConversionService()));
 			registry.addInterceptor(new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider()));
-			this.interceptors = registry.getInterceptors();
+			this.interceptors = registry.getInterceptors();//把用户自己通过bean方式注册的拦截器放到interceptors中去
 		}
 		return this.interceptors.toArray();
 	}
@@ -341,6 +346,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see InterceptorRegistry
 	 */
 	protected void addInterceptors(InterceptorRegistry registry) {
+		//让子类去覆盖的模板方法,InterceptorRegistry对象是被当前类创建
 	}
 
 	/**
